@@ -18,12 +18,19 @@ export class DocumentsService {
       console.log('conversion', convertPdf);
       const readTheText = await this.ocrService.extractTextFromPdf(convertPdf);
       console.log('texte', readTheText);
+      console.log(
+        `Texte OCR (${readTheText.length} caractères) :`,
+        readTheText,
+      );
+
+      const type = this.whatTypeOfDoc(readTheText);
+      console.log(type, 'type');
       const uploadDoc = await this.prisma.document.create({
         data: {
           filename: file.filename,
           originalName: file.originalname,
           url: `/uploads/${file.filename}`,
-          type: DocumentType.AUTRE,
+          type: type,
           status: DocumentStatus.IN_PROGRESS,
           textExtracted: readTheText,
         },
@@ -57,5 +64,30 @@ export class DocumentsService {
       },
     });
     return docById;
+  }
+
+  private whatTypeOfDoc(text: string): DocumentType {
+    const lower = text.toLowerCase();
+    console.log('Analyse :', lower);
+
+    if (
+      lower.includes('cerfa') ||
+      lower.includes('formulaire cerfa') ||
+      lower.match(/cerfa\s*n?[°0-9]/)
+    ) {
+      return DocumentType.CERFA;
+    }
+
+    if (
+      lower.includes('facture') ||
+      lower.includes('tva') ||
+      lower.includes('client') ||
+      lower.includes('total ht') ||
+      lower.includes('siret')
+    ) {
+      return DocumentType.FACTURE;
+    }
+
+    return DocumentType.AUTRE;
   }
 }

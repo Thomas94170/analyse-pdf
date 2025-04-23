@@ -13,7 +13,7 @@ import { diskStorage } from 'multer';
 import { DocumentsService } from './document.service';
 import { v4 as uuidv4 } from 'uuid';
 import { extname } from 'path';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Controller('documents')
 export class DocumentsController {

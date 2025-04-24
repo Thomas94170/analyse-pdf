@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  
 }
 
 datasource db {
@@ -17,6 +16,7 @@ model Document {
   status        DocumentStatus @default(IN_PROGRESS)
   textExtracted String?
   createdAt     DateTime       @default(now())
+  metadata      Json?
 }
 
 enum DocumentType {

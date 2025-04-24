@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DocumentStatus, DocumentType, Document } from '@prisma/client';
+import { DocumentStatus, DocumentType, Document, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { OcrService } from '../ocr/ocr.service';
 import { PdfService } from '../pdftoimg/pdftoimg.service';
@@ -24,6 +24,9 @@ export class DocumentsService {
       );
 
       const type = this.whatTypeOfDoc(readTheText);
+      const dataExtracted: Record<string, string | null> | null =
+        this.extractMetaData(type, readTheText);
+
       console.log(type, 'type');
       const uploadDoc = await this.prisma.document.create({
         data: {
@@ -33,6 +36,7 @@ export class DocumentsService {
           type: type,
           status: DocumentStatus.IN_PROGRESS,
           textExtracted: readTheText,
+          metadata: dataExtracted ?? Prisma.DbNull,
         },
       });
       console.log(uploadDoc, 'upload ici');
@@ -49,6 +53,7 @@ export class DocumentsService {
         id: true,
         originalName: true,
         textExtracted: true,
+        metadata: true,
       },
     });
     return allDocuments;
@@ -61,6 +66,7 @@ export class DocumentsService {
         id: true,
         originalName: true,
         textExtracted: true,
+        metadata: true,
       },
     });
     return docById;
@@ -120,5 +126,29 @@ export class DocumentsService {
     }
 
     return DocumentType.AUTRE;
+  }
+
+  private extractMetaData(
+    type: DocumentType,
+    text: string,
+  ): Record<string, string | null> | null {
+    const result: Record<string, string | null> = {};
+
+    if (type === DocumentType.FACTURE) {
+      const siretMatch = text.match(/siret\s*[:-]?\s*((?:\d\s*){14})/i);
+      const totalHTMatch = text.match(/total\s*ht\s*[:=-]?\s*([\d\s,.]+)/i);
+      const totalTTCMatch = text.match(/total\s*ttc\s*[:=-]?\s*([\d\s,.]+)/i);
+
+      result.siret = siretMatch ? siretMatch[1].replace(/\s/g, '') : null;
+      result.totalHT = totalHTMatch?.[1].replace(/\s/g, '') || null;
+      result.totalTTC = totalTTCMatch?.[1].replace(/\s/g, '') || null;
+    }
+
+    if (type === DocumentType.CERFA) {
+      const cerfaNumber = text.match(/cerfa\s*(n[°o]?)?\s*(\d{5})/i);
+      result.formulaire = cerfaNumber?.[2] || null;
+    }
+
+    return result;
   }
 }

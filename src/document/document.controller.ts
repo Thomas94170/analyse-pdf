@@ -4,9 +4,10 @@ import {
   UploadedFile,
   UseInterceptors,
   BadRequestException,
-  NotFoundException,
   Get,
   Param,
+  Delete,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -60,7 +61,7 @@ export class DocumentsController {
     try {
       const readAll = await this.documentsService.readAllDocuments();
       if (!readAll) {
-        throw new NotFoundException(`Aucun doc en bdd`);
+        throw new BadRequestException(`Aucun doc en bdd`);
       }
       return readAll;
     } catch (error) {
@@ -73,9 +74,31 @@ export class DocumentsController {
     try {
       const docById = await this.documentsService.readDocumentById({ id });
       if (!docById) {
-        throw new NotFoundException(`Pas de doc avec id ${id}`);
+        throw new BadRequestException(`Pas de doc avec id ${id}`);
       }
       return docById;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  @Get('searchByWord')
+  async searchByWord(@Query('query') query: string) {
+    const search = await this.documentsService.getDocumentByWordKey(query);
+    if (!query || query.trim().length === 0) {
+      throw new BadRequestException(`Aucune lettre ou mot renseigné`);
+    }
+    return search;
+  }
+
+  @Delete('delete/:id')
+  async deleteDocument(@Param('id') id: string) {
+    try {
+      const delDocument = await this.documentsService.deleteDocument({ id });
+      if (!delDocument) {
+        throw new BadRequestException(`pas de doc à effacer avec id: ${id}`);
+      }
+      return delDocument;
     } catch (error) {
       console.log(error);
     }

@@ -66,6 +66,37 @@ export class DocumentsService {
     return docById;
   }
 
+  async deleteDocument({ id }: { id: string }) {
+    try {
+      const delDoc = await this.prisma.document.delete({ where: { id } });
+      return delDoc;
+    } catch (error) {
+      throw new Error(`erreur: ${error}`);
+    }
+  }
+
+  async getDocumentByWordKey(query: string) {
+    try {
+      const searchWord = await this.prisma.document.findMany({
+        where: {
+          textExtracted: {
+            contains: query,
+            mode: 'insensitive',
+          },
+        },
+        select: {
+          id: true,
+          originalName: true,
+          type: true,
+          textExtracted: true,
+        },
+      });
+      return searchWord;
+    } catch (error) {
+      throw new Error(`Èrreur dans la recherche par mot clé: ${error}`);
+    }
+  }
+
   private whatTypeOfDoc(text: string): DocumentType {
     const lower = text.toLowerCase();
     console.log('Analyse :', lower);

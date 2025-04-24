@@ -20,7 +20,9 @@ export class PdfService {
     const outputBase = filename.replace('.pdf', '');
 
     // Commande shell pour pdftocairo
-    const command = `pdftocairo -png -f 1 -l 1 -scale-to 1024 "${input}" "${join(outputDir, outputBase)}"`;
+    //const command = `pdftocairo -png -f 1 -l 1 -scale-to 1024 "${input}" "${join(outputDir, outputBase)}"`;
+    const pdftocairoPath = '/opt/homebrew/bin/pdftocairo'; // adapte à ton système
+    const command = `${pdftocairoPath} -png -f 1 -l 1 -scale-to 1024 "${input}" "${join(outputDir, outputBase)}"`;
 
     // Chemin final de l’image attendue (page 1)
     const outputImage = join(outputDir, `${outputBase}-1.png`);

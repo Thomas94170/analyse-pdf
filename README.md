@@ -96,3 +96,30 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+
+📁 Upload et traitement OCR
+
+Endpoint POST /documents avec :
+Upload d’un fichier PDF avec Multer.
+Conversion PDF → image avec pdftocairo.
+Extraction de texte via Tesseract.js.
+Normalisation du texte pour détecter les doublons.
+Détection automatique du type de document (FACTURE / CERFA / AUTRE).
+Extraction de métadonnées clés :
+SIRET
+Total HT
+Total TTC
+Date d’échéance ou date de paiement
+Insertion complète en base de données avec Prisma et champ metadata (type JSONB).
+🔍 Fonctionnalités avancées déjà présentes
+
+Endpoint GET /documents/search?q=mot pour rechercher un mot dans le texte OCR extrait (ILIKE sur textExtracted).
+Endpoint GET /documents pour lister tous les documents.
+Endpoint GET /documents/id/:id pour afficher un document par son ID.
+Système de détection automatique des doublons à l'upload.
+Logique d’analyse de texte robuste avec regex adaptées au contexte de facture/CERFA.
+💰 Début du module CA
+
+Ajout du modèle Income en base.
+Endpoint GET prêt à calculer le chiffre d'affaires annuel à partir des montants TTC contenus dans les métadonnées (pas encore déclenché automatiquement).

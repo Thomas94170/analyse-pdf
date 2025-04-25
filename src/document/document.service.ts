@@ -22,10 +22,20 @@ export class DocumentsService {
         `Texte OCR (${readTheText.length} caractères) :`,
         readTheText,
       );
+      const normalizedText = readTheText
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase();
+      const existingDocument = await this.prisma.document.findFirst({
+        where: { textExtracted: normalizedText },
+      });
+      if (existingDocument) {
+        throw new Error(`Document doublon, pas dupload `);
+      }
 
-      const type = this.whatTypeOfDoc(readTheText);
+      const type = this.whatTypeOfDoc(normalizedText);
       const dataExtracted: Record<string, string | null> | null =
-        this.extractMetaData(type, readTheText);
+        this.extractMetaData(type, normalizedText);
 
       console.log(type, 'type');
       const uploadDoc = await this.prisma.document.create({
@@ -35,7 +45,7 @@ export class DocumentsService {
           url: `/uploads/${file.filename}`,
           type: type,
           status: DocumentStatus.IN_PROGRESS,
-          textExtracted: readTheText,
+          textExtracted: normalizedText,
           metadata: dataExtracted ?? Prisma.DbNull,
         },
       });
@@ -138,10 +148,14 @@ export class DocumentsService {
       const siretMatch = text.match(/siret\s*[:-]?\s*((?:\d\s*){14})/i);
       const totalHTMatch = text.match(/total\s*ht\s*[:=-]?\s*([\d\s,.]+)/i);
       const totalTTCMatch = text.match(/total\s*ttc\s*[:=-]?\s*([\d\s,.]+)/i);
+      const paymentDateMatch = text.match(
+        /(?:échéance\s+de\s+paiement|date\s+de\s+paiement|date|échéance|payé|payés?)[:=-]?\s*(\d{1,2}\/\d{1,2}\/\d{2,4}|\d{1,2}\s+(?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+\d{4})/i,
+      );
 
       result.siret = siretMatch ? siretMatch[1].replace(/\s/g, '') : null;
       result.totalHT = totalHTMatch?.[1].replace(/\s/g, '') || null;
       result.totalTTC = totalTTCMatch?.[1].replace(/\s/g, '') || null;
+      result.paymentDate = paymentDateMatch?.[1].replace(/\s/g, '') || null;
     }
 
     if (type === DocumentType.CERFA) {

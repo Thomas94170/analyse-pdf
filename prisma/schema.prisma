@@ -17,6 +17,18 @@ model Document {
   textExtracted String?
   createdAt     DateTime       @default(now())
   metadata      Json?
+  Income  Income[]
+}
+
+model Income {
+   id            String         @id @default(uuid())
+   month  Int
+   year   Int
+   amount Float
+   documentId String
+   document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  createdAt     DateTime       @default(now())
+
 }
 
 enum DocumentType {

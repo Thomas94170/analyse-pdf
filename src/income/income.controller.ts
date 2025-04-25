@@ -18,4 +18,17 @@ export class IncomeController {
       throw new BadRequestException(`erreur ${error}`);
     }
   }
+
+  @Get('annual-taxation')
+  async annualTaxation(@Query('year') year: number) {
+    try {
+      const result = await this.incomeService.annualTaxation(year);
+      if (!result) {
+        throw new Error(`pas de rentree d argent donc pas de taxe `);
+      }
+      return result;
+    } catch (error) {
+      throw new BadRequestException(`erreur ${error}`);
+    }
+  }
 }

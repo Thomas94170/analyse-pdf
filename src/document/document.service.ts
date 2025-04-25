@@ -50,6 +50,34 @@ export class DocumentsService {
         },
       });
       console.log(uploadDoc, 'upload ici');
+      // Création de l'entrée Income si données disponibles
+      const totalTTCString = dataExtracted?.totalTTC?.replace(',', '.');
+      const amount = totalTTCString ? parseFloat(totalTTCString) : null;
+
+      const rawDate = dataExtracted?.paymentDate;
+      let year: number | null = null;
+
+      if (rawDate) {
+        const dateParts = rawDate.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+        if (dateParts) {
+          const [, , , yearPart] = dateParts;
+          year = parseInt(yearPart.length === 2 ? `20${yearPart}` : yearPart);
+        }
+      }
+
+      if (amount && year) {
+        await this.prisma.income.create({
+          data: {
+            amount,
+            year,
+            documentId: uploadDoc.id,
+          },
+        });
+        console.log(`💸 Income enregistré : ${amount}€ pour ${year}`);
+      } else {
+        console.log('⚠️ Income non enregistré : données manquantes');
+      }
+
       return uploadDoc;
     } catch (error) {
       console.error('Erreur pendant l’enregistrement du document :', error);
@@ -149,7 +177,7 @@ export class DocumentsService {
       const totalHTMatch = text.match(/total\s*ht\s*[:=-]?\s*([\d\s,.]+)/i);
       const totalTTCMatch = text.match(/total\s*ttc\s*[:=-]?\s*([\d\s,.]+)/i);
       const paymentDateMatch = text.match(
-        /(?:échéance\s+de\s+paiement|date\s+de\s+paiement|date|échéance|payé|payés?)[:=-]?\s*(\d{1,2}\/\d{1,2}\/\d{2,4}|\d{1,2}\s+(?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+\d{4})/i,
+        /(?:échéance(?:\s+de\s+paiement)?|date(?:\s+d['e]mission|\s+d['e]chéance|\s+de\s+paiement)?|date)?\s*[:=-]?\s*(\d{1,2}\/\d{1,2}\/\d{2,4})/i,
       );
 
       result.siret = siretMatch ? siretMatch[1].replace(/\s/g, '') : null;

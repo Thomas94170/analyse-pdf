@@ -1,0 +1,20 @@
+before run the server
+
+run prisma : 
+npx prisma generate
+
+
+run the server : 
+npm run start:dev
+
+add or update the database : 
+npx prisma migrate dev --name xxxxx
+npx prisma generate
+restart the server
+
+push the database in supabase on your prisma : 
+npx prisma db pull
+
+sometimes, delete the specific file in prisma node modules for generate the database
+
+after update or add db, stop the server, leave VSC and all restarted

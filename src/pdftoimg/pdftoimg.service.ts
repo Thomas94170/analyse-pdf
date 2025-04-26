@@ -9,22 +9,17 @@ const execAsync = promisify(exec);
 @Injectable()
 export class PdfService {
   async convertPdfToImage(filename: string): Promise<string> {
-    // Chemin vers le PDF source
     const input = join(__dirname, '..', '..', 'uploads', filename);
 
-    // Dossier de sortie des PNG
     const outputDir = join(__dirname, '..', '..', 'uploads', 'converted');
     mkdirSync(outputDir, { recursive: true });
 
-    // Nom de base sans extension
     const outputBase = filename.replace('.pdf', '');
 
-    // Commande shell pour pdftocairo
     //const command = `pdftocairo -png -f 1 -l 1 -scale-to 1024 "${input}" "${join(outputDir, outputBase)}"`;
     const pdftocairoPath = '/opt/homebrew/bin/pdftocairo'; // adapte à ton système
     const command = `${pdftocairoPath} -png -f 1 -l 1 -scale-to 1024 "${input}" "${join(outputDir, outputBase)}"`;
 
-    // Chemin final de l’image attendue (page 1)
     const outputImage = join(outputDir, `${outputBase}-1.png`);
 
     try {

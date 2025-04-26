@@ -33,6 +33,7 @@ enum DocumentType {
   FACTURE
   CERFA
   AUTRE
+  DEVIS
 }
 
 enum DocumentStatus {

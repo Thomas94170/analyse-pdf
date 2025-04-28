@@ -17,7 +17,7 @@ export class IncomeService {
 
   async annualTaxation(year: number) {
     const incomeResult = await this.prisma.income.aggregate({
-      where: { year },
+      where: { year, document: { status: 'VALIDATED', type: 'FACTURE' } },
       _sum: { amount: true },
     });
     const totalIncome = incomeResult._sum.amount || 0;

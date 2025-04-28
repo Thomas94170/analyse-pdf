@@ -50,7 +50,7 @@ export class DocumentsService {
         },
       });
       console.log(uploadDoc, 'upload ici');
-      // Création de l'entrée Income si données disponibles
+
       const totalTTCString = dataExtracted?.totalTTC?.replace(',', '.');
       const amount = totalTTCString ? parseFloat(totalTTCString) : null;
 
@@ -154,9 +154,9 @@ export class DocumentsService {
     }
 
     if (
-      lower.includes('facture')
+      lower.includes('facture') ||
+      lower.includes('payée')
       //||
-      // lower.includes('tva') ||
       // lower.includes('client') ||
       // lower.includes('total ht') ||
       // lower.includes('siret')
@@ -179,17 +179,15 @@ export class DocumentsService {
 
     if (type === DocumentType.FACTURE) {
       const factureMatch = text.match(/facture\s*ht\s*[:=-]?\s*([\d\s,.]+)/i);
-      //const siretMatch = text.match(/siret\s*[:-]?\s*((?:\d\s*){14})/i);
-      //const totalHTMatch = text.match(/total\s*ht\s*[:=-]?\s*([\d\s,.]+)/i);
-      //const totalTTCMatch = text.match(/total\s*ttc\s*[:=-]?\s*([\d\s,.]+)/i);
-      // const paymentDateMatch = text.match(
-      //(?:échéance(?:\s+de\s+paiement)?|date(?:\s+d['e]mission|\s+d['e]chéance|\s+de\s+paiement)?|date)?\s*[:=-]?\s*(\d{1,2}\/\d{1,2}\/\d{2,4})/i,
-      // );
+      const paidMatch = text.match(/payée\s*[:-]?\s*((?:\d\s*){14})/i);
+      const totalHTMatch = text.match(/total\s*ht\s*[:=-]?\s*([\d\s,.]+)/i);
+      const totalTTCMatch = text.match(/total\s*ttc\s*[:=-]?\s*([\d\s,.]+)/i);
+      // const paymentDateMatch = text.match((?:échéance(?:\s+de\s+paiement)?|date(?:\s+d['e]mission|\s+d['e]chéance|\s+de\s+paiement)?|date)?\s*[:=-]?\s*(\d{1,2}\/\d{1,2}\/\d{2,4})/i,);
 
       result.facture = factureMatch ? factureMatch[1].replace(/\s/g, '') : null;
-      // result.siret = siretMatch ? siretMatch[1].replace(/\s/g, '') : null;
-      // result.totalHT = totalHTMatch?.[1].replace(/\s/g, '') || null;
-      // result.totalTTC = totalTTCMatch?.[1].replace(/\s/g, '') || null;
+      result.paid = paidMatch ? paidMatch[1].replace(/\s/g, '') : null;
+      result.totalHT = totalHTMatch?.[1].replace(/\s/g, '') || null;
+      result.totalTTC = totalTTCMatch?.[1].replace(/\s/g, '') || null;
       // result.paymentDate = paymentDateMatch?.[1].replace(/\s/g, '') || null;
     }
 

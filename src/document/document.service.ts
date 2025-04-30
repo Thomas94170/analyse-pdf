@@ -74,6 +74,11 @@ export class DocumentsService {
       where: { originalName },
       data: { status: 'VALIDATED' },
     });
+
+    await this.recordInvoice(
+      docUpdated.id,
+      docUpdated.metadata as Record<string, string | null> | null,
+    );
     return docUpdated;
   }
 
@@ -209,7 +214,7 @@ export class DocumentsService {
     });
     if (
       !document ||
-      document.status === 'VALIDATED' ||
+      document.status !== 'VALIDATED' ||
       document.type !== 'FACTURE'
     ) {
       console.log('Document exclu du traitement income :', {

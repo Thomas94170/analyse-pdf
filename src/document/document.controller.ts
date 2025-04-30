@@ -113,7 +113,7 @@ export class DocumentsController {
       });
       if (!changeStatus) {
         throw new BadRequestException(
-          `pas de doc à effacer avec id: ${originalName}`,
+          `pas de doc à mettre à jour avec id: ${originalName}`,
         );
       }
       return {

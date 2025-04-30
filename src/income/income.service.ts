@@ -14,7 +14,7 @@ export class IncomeService {
           type: 'FACTURE',
         },
       },
-      //  _sum: { amount: true },
+      _sum: { amount: true },
     });
 
     console.log(incomeResult);

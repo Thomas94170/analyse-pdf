@@ -8,6 +8,7 @@ import {
   Param,
   Delete,
   Query,
+  Patch,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -101,6 +102,28 @@ export class DocumentsController {
       return delDocument;
     } catch (error) {
       console.log(error);
+    }
+  }
+
+  @Patch('update/:facture')
+  async updateDocument(@Param('facture') originalName: string) {
+    try {
+      const changeStatus = await this.documentsService.updateDocs({
+        originalName,
+      });
+      if (!changeStatus) {
+        throw new BadRequestException(
+          `pas de doc à effacer avec id: ${originalName}`,
+        );
+      }
+      return {
+        document: changeStatus,
+        message: `document mis à jour, facture enregistrée payée`,
+      };
+    } catch (error) {
+      console.error(
+        `erreur lors du changement de statut de la facture:  ${error}`,
+      );
     }
   }
 }

@@ -10,7 +10,7 @@ datasource db {
 model Document {
   id            String         @id @default(uuid())
   filename      String
-  originalName  String
+  originalName  String         @unique
   url           String
   type          DocumentType   @default(AUTRE)
   status        DocumentStatus @default(IN_PROGRESS)

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { DocumentStatus, DocumentType, Document, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { OcrService } from '../ocr/ocr.service';
@@ -51,38 +51,30 @@ export class DocumentsService {
       });
       console.log(uploadDoc, 'upload ici');
 
-      const totalTTCString = dataExtracted?.totalTTC?.replace(',', '.');
-      const amount = totalTTCString ? parseFloat(totalTTCString) : null;
-
-      const rawDate = dataExtracted?.paymentDate;
-      let year: number | null = null;
-
-      if (rawDate) {
-        const dateParts = rawDate.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
-        if (dateParts) {
-          const [, , , yearPart] = dateParts;
-          year = parseInt(yearPart.length === 2 ? `20${yearPart}` : yearPart);
-        }
-      }
-
-      if (amount && year) {
-        await this.prisma.income.create({
-          data: {
-            amount,
-            year,
-            documentId: uploadDoc.id,
-          },
-        });
-        console.log(`💸 Income enregistré : ${amount}€ pour ${year}`);
-      } else {
-        console.log('⚠️ Income non enregistré : données manquantes');
-      }
-
+      await this.recordInvoice(uploadDoc.id, dataExtracted);
       return uploadDoc;
     } catch (error) {
       console.error('Erreur pendant l’enregistrement du document :', error);
       throw new Error('Erreur lors de la création du document');
     }
+  }
+
+  async updateDocs({ originalName }: { originalName: string }) {
+    const findDoc = await this.prisma.document.findUnique({
+      where: { originalName },
+    });
+
+    if (!findDoc) {
+      throw new BadRequestException(
+        `aucun document à ce jour à mettre à jour: ${findDoc}`,
+      );
+    }
+
+    const docUpdated = await this.prisma.document.update({
+      where: { originalName },
+      data: { status: 'VALIDATED' },
+    });
+    return docUpdated;
   }
 
   async readAllDocuments() {
@@ -178,17 +170,19 @@ export class DocumentsService {
     const result: Record<string, string | null> = {};
 
     if (type === DocumentType.FACTURE) {
-      const factureMatch = text.match(/facture\s*ht\s*[:=-]?\s*([\d\s,.]+)/i);
+      const factureMatch = text.match(/n[°º]?\s*(fa-\d{6}-\d+)/i);
       const paidMatch = text.match(/payée\s*[:-]?\s*((?:\d\s*){14})/i);
       const totalHTMatch = text.match(/total\s*ht\s*[:=-]?\s*([\d\s,.]+)/i);
       const totalTTCMatch = text.match(/total\s*ttc\s*[:=-]?\s*([\d\s,.]+)/i);
-      // const paymentDateMatch = text.match((?:échéance(?:\s+de\s+paiement)?|date(?:\s+d['e]mission|\s+d['e]chéance|\s+de\s+paiement)?|date)?\s*[:=-]?\s*(\d{1,2}\/\d{1,2}\/\d{2,4})/i,);
+      const paymentDateMatch = text.match(
+        /(?:date\s+d[’']échéance|date)\s*[:=-]?\s*(\d{1,2}(?:\/|-|\s)?(?:\d{1,2}|[a-zéû]+)(?:\/|-|\s)?\d{2,4})/i,
+      );
 
       result.facture = factureMatch ? factureMatch[1].replace(/\s/g, '') : null;
       result.paid = paidMatch ? paidMatch[1].replace(/\s/g, '') : null;
       result.totalHT = totalHTMatch?.[1].replace(/\s/g, '') || null;
       result.totalTTC = totalTTCMatch?.[1].replace(/\s/g, '') || null;
-      // result.paymentDate = paymentDateMatch?.[1].replace(/\s/g, '') || null;
+      result.paymentDate = paymentDateMatch?.[1].replace(/\s/g, '') || null;
     }
 
     if (type === DocumentType.CERFA) {
@@ -205,4 +199,76 @@ export class DocumentsService {
 
     return result;
   }
+
+  private async recordInvoice(
+    documentId: string,
+    metadata: Record<string, string | null> | null,
+  ): Promise<void> {
+    const document = await this.prisma.document.findUnique({
+      where: { id: documentId },
+    });
+    if (
+      !document ||
+      document.status === 'VALIDATED' ||
+      document.type !== 'FACTURE'
+    ) {
+      console.log('Document exclu du traitement income :', {
+        exists: !!document,
+        status: document?.status,
+        type: document?.type,
+      });
+      return;
+    }
+
+    const totalTTCString = metadata?.totalTTC?.replace(',', '.');
+    const amount = totalTTCString ? parseFloat(totalTTCString) : null;
+    console.log(totalTTCString, amount);
+
+    const rawDate = metadata?.paymentDate;
+    let year: number | null = null;
+    console.log(year);
+
+    if (rawDate) {
+      //format normal
+      const dateParts = rawDate.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+      if (dateParts) {
+        const [, , , yearPart] = dateParts;
+        year = parseInt(yearPart.length === 2 ? `20${yearPart}` : yearPart);
+      }
+
+      if (!year) {
+        const spacedDate = rawDate.match(
+          /(\d{1,2})\s+(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+(\d{4})/i,
+        );
+        if (spacedDate) {
+          year = parseInt(spacedDate[3]);
+        }
+      }
+
+      if (!year) {
+        //format collé
+
+        const compactedDate = rawDate.match(
+          /(\d{1,2})(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)(\d{4})/i,
+        );
+        if (compactedDate) {
+          year = parseInt(compactedDate[3]);
+        }
+      }
+    }
+
+    if (amount && year) {
+      await this.prisma.income.create({
+        data: {
+          amount,
+          year,
+          documentId,
+        },
+      });
+      console.log(`💸 Income enregistré : ${amount}€ pour ${year}`);
+    } else {
+      console.log('⚠️ Income non enregistré : données manquantes');
+    }
+  }
 }
+//voi le format de date, c est pour cela que ca ne s'enregistre pas

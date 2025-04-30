@@ -7,8 +7,14 @@ export class IncomeService {
 
   async annualIncome(year: number) {
     const incomeResult = await this.prisma.income.aggregate({
-      where: { year },
-      _sum: { amount: true },
+      where: {
+        year,
+        document: {
+          status: 'VALIDATED',
+          type: 'FACTURE',
+        },
+      },
+      //  _sum: { amount: true },
     });
 
     console.log(incomeResult);

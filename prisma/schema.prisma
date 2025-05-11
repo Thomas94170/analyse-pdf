@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "./node_modules/@prisma/client"
 }
 
 datasource db {
@@ -25,8 +26,30 @@ model Income {
   year       Int
   amount     Float
   documentId String
+  invoiceId  String?
   createdAt  DateTime @default(now())
   document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  invoice    Invoice? @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+model Invoice {
+   id           String   @id @default(uuid())
+   number       String
+   createdAt    DateTime  @default(now())
+   dueDate      DateTime  @default(now())
+   totalBT      Float
+   totalInclTax Float
+   client       String
+   email        String?
+   phoneNumber  String?
+   status       InvoiceStatus
+   Income       Income[]
+
+}
+
+enum InvoiceStatus {
+  ON_HOLD
+  PAID
 }
 
 enum DocumentType {

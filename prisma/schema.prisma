@@ -21,19 +21,18 @@ model Document {
 }
 
 model Income {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   year       Int
   amount     Float
-  documentId String
-  createdAt  DateTime @default(now())
+  documentId String?
+  createdAt  DateTime  @default(now())
   invoiceId  String?
-  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  invoice    Invoice? @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  document   Document? @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  invoice    Invoice?  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
 
 model Invoice {
   id           String        @id @default(uuid())
-  number       String
   createdAt    DateTime      @default(now())
   dueDate      DateTime      @default(now())
   totalBT      Float
@@ -41,7 +40,8 @@ model Invoice {
   client       String
   email        String?
   phoneNumber  String?
-  status       InvoiceStatus
+  status       InvoiceStatus @default(ON_HOLD)
+  invoiceName  String        @unique
   Income       Income[]
 }
 

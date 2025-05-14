@@ -6,7 +6,7 @@ export class IncomeService {
   constructor(private readonly prisma: PrismaService) {}
 
   async annualIncome(year: number) {
-    const incomeResult = await this.prisma.income.aggregate({
+    const docResult = await this.prisma.income.aggregate({
       where: {
         year,
         document: {
@@ -17,18 +17,52 @@ export class IncomeService {
       _sum: { amount: true },
     });
 
-    console.log(incomeResult);
-    return incomeResult;
+    const invoiceResult = await this.prisma.invoice.aggregate({
+      where: {
+        status: 'PAID',
+        dueDate: {
+          gte: new Date(`${year}-01-01`),
+          lt: new Date(`${year + 1}-01-01`),
+        },
+      },
+      _sum: { totalInclTax: true },
+    });
+    const docIncome = docResult._sum.amount || 0;
+    const invoiceIncome = invoiceResult._sum.totalInclTax || 0;
+    const totalIncome = docIncome + invoiceIncome;
+
+    console.log(`CA documents: ${docIncome}€`);
+    console.log(`CA invoices: ${invoiceIncome}€`);
+    console.log(`Total CA ${year}: ${totalIncome}€`);
+
+    return totalIncome;
   }
 
   async annualTaxation(year: number) {
-    const incomeResult = await this.prisma.income.aggregate({
+    const docResult = await this.prisma.income.aggregate({
       where: { year, document: { status: 'VALIDATED', type: 'FACTURE' } },
       _sum: { amount: true },
     });
-    const totalIncome = incomeResult._sum.amount || 0;
+    const invoiceResult = await this.prisma.invoice.aggregate({
+      where: {
+        status: 'PAID',
+        dueDate: {
+          gte: new Date(`${year}-01-01`),
+          lt: new Date(`${year + 1}-01-01`),
+        },
+      },
+      _sum: { totalInclTax: true },
+    });
+
+    const docIncome = docResult._sum.amount || 0;
+    const invoiceIncome = invoiceResult._sum.totalInclTax || 0;
+    const totalIncome = docIncome + invoiceIncome;
+
     const taxation = totalIncome * 0.261;
-    console.log(`payer taxe : ${taxation}`);
+    console.log(`📊 Total CA ${year}: ${totalIncome}€`);
+    console.log(`💸 Taxes dues ${year}: ${taxation}€`);
+
     return taxation;
   }
 }
+// regarder pourquoi invoice ne s affiche pas pour 2025

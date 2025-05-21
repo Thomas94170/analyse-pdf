@@ -23,6 +23,7 @@ model Document {
 model Income {
   id         String    @id @default(uuid())
   year       Int
+  month      Int?
   amount     Float
   documentId String?
   createdAt  DateTime  @default(now())

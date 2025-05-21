@@ -27,6 +27,7 @@ export class IncomeService {
       },
       _sum: { totalInclTax: true },
     });
+    console.log(`Invoices détectées pour ${year}:`, invoiceResult);
     const docIncome = docResult._sum.amount || 0;
     const invoiceIncome = invoiceResult._sum.totalInclTax || 0;
     const totalIncome = docIncome + invoiceIncome;
@@ -65,4 +66,3 @@ export class IncomeService {
     return taxation;
   }
 }
-// regarder pourquoi invoice ne s affiche pas pour 2025

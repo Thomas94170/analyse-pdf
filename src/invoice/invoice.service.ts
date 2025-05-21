@@ -91,6 +91,7 @@ export class InvoiceService {
         email: createInvoiceDto.email,
       },
     });
+    console.log(`invoice created`);
     return create;
   }
 
@@ -110,16 +111,19 @@ export class InvoiceService {
       where: { invoiceId: updatedInvoice.id },
     });
     if (!existingIncome) {
-      const year = updatedInvoice.dueDate.getFullYear();
+      const dueDate = updatedInvoice.dueDate;
+      const year = dueDate.getFullYear();
+      const month = dueDate.getMonth() + 1;
       await this.prisma.income.create({
         data: {
           amount: updatedInvoice.totalInclTax,
           year: year,
+          month,
           invoiceId: updatedInvoice.id,
         },
       });
       console.log(
-        `💰 Income recorded for Invoice ${invoiceName} : ${updatedInvoice.totalInclTax}€ for year ${year}`,
+        `💰 Income recorded for Invoice ${invoiceName} : ${updatedInvoice.totalInclTax}€ for month ${month} for year ${year}`,
       );
     } else {
       console.log(`ℹIncome already exists ${invoiceName}`);

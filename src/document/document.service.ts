@@ -205,6 +205,70 @@ export class DocumentsService {
     return result;
   }
 
+  private extractMonthFromRawDate(rawdate: string): Date | null {
+    const normalized = rawdate.replace(',', '.');
+
+    const slashDate = normalized.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+    if (slashDate) {
+      const [day, month, year] = slashDate;
+      const y = year.length === 2 ? `20${year}` : year;
+      return new Date(`${y}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
+    }
+
+    const spacedDate = normalized.match(/(\d{1,2})\s+(.*?)\s+(\d{4})/i);
+    if (spacedDate) {
+      const day = spacedDate[1];
+      const monthName = spacedDate[2].toLowerCase();
+      const year = spacedDate[3];
+      const monthMap = {
+        janvier: 1,
+        février: 2,
+        mars: 3,
+        avril: 4,
+        mai: 5,
+        juin: 6,
+        juillet: 7,
+        août: 8,
+        septembre: 9,
+        octobre: 10,
+        novembre: 11,
+        décembre: 12,
+      };
+      const month = monthMap[monthName];
+      if (month)
+        return new Date(
+          `${year}-${String(month).padStart(2, '0')}-${day.padStart(2, '0')}`,
+        );
+    }
+
+    const compactDate = normalized.match(/(\d{1,2})([a-zéû]+)(\d{4})/i);
+    if (compactDate) {
+      const day = compactDate[1];
+      const monthName = compactDate[2].toLowerCase();
+      const year = compactDate[3];
+      const monthMap = {
+        janvier: 1,
+        février: 2,
+        mars: 3,
+        avril: 4,
+        mai: 5,
+        juin: 6,
+        juillet: 7,
+        août: 8,
+        septembre: 9,
+        octobre: 10,
+        novembre: 11,
+        décembre: 12,
+      };
+      const month = monthMap[monthName];
+      if (month)
+        return new Date(
+          `${year}-${String(month).padStart(2, '0')}-${day.padStart(2, '0')}`,
+        );
+    }
+    return null;
+  }
+
   private async recordInvoice(
     documentId: string,
     metadata: Record<string, string | null> | null,
@@ -263,17 +327,29 @@ export class DocumentsService {
     }
 
     if (amount && year) {
+      let month: number | null = null;
+
+      if (rawDate) {
+        const findMonth = this.extractMonthFromRawDate(rawDate);
+        if (findMonth) {
+          month = findMonth.getMonth() + 1;
+        }
+      }
+
+      if (!month) {
+        console.log('month not find no recording for this invoice');
+      }
       await this.prisma.income.create({
         data: {
           amount,
           year,
+          month,
           documentId,
         },
       });
-      console.log(`💸 Income enregistré : ${amount}€ pour ${year}`);
+      console.log(`💸 Income enregistré : ${amount}€ pour ${month} - ${year}`);
     } else {
       console.log('⚠️ Income non enregistré : données manquantes');
     }
   }
 }
-//voi le format de date, c est pour cela que ca ne s'enregistre pas

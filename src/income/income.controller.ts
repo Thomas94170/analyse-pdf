@@ -61,4 +61,20 @@ export class IncomeController {
       throw new BadRequestException(`error: ${error}`);
     }
   }
+
+  @Get('monthly-taxation')
+  async monthlyTaxation(
+    @Query('year', ParseIntPipe) year: number,
+    @Query('month', ParseIntPipe) month: number,
+  ) {
+    try {
+      const result = await this.incomeService.monthlyTaxation(year, month);
+      if (result === null || !result) {
+        throw new Error(`no income and no tax for this ${month}`);
+      }
+      return result;
+    } catch (error) {
+      throw new BadRequestException(`error: ${error}`);
+    }
+  }
 }

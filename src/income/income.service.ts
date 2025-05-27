@@ -98,4 +98,12 @@ export class IncomeService {
 
     return totalIncome;
   }
+
+  async monthlyTaxation(year: number, month: number) {
+    const totalIncomeByMonth = await this.monthlyIncome(year, month);
+
+    const taxation = totalIncomeByMonth * 0.261;
+    console.log(`📅 taxation du mois ${month}/${year}: ${taxation}€`);
+    return taxation;
+  }
 }

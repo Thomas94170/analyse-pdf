@@ -1,4 +1,10 @@
-import { BadRequestException, Controller, Get, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  ParseIntPipe,
+  Query,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { IncomeService } from './income.service';
 
@@ -37,6 +43,22 @@ export class IncomeController {
       return result;
     } catch (error) {
       throw new BadRequestException(`erreur ${error}`);
+    }
+  }
+
+  @Get('monthly-income')
+  async monthlyIncome(
+    @Query('year', ParseIntPipe) year: number,
+    @Query('month', ParseIntPipe) month: number,
+  ) {
+    try {
+      const result = await this.incomeService.monthlyIncome(year, month);
+      if (!result) {
+        throw new Error(`no income for this month ${month} year ${year}`);
+      }
+      return result;
+    } catch (error) {
+      throw new BadRequestException(`error: ${error}`);
     }
   }
 }

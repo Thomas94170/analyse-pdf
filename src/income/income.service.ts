@@ -65,4 +65,37 @@ export class IncomeService {
 
     return taxation;
   }
+
+  async monthlyIncome(year: number, month: number) {
+    const docResult = await this.prisma.income.aggregate({
+      where: {
+        year,
+        month,
+        document: {
+          status: 'VALIDATED',
+          type: 'FACTURE',
+        },
+      },
+      _sum: { amount: true },
+    });
+
+    const invoiceResult = await this.prisma.invoice.aggregate({
+      where: {
+        status: 'PAID',
+        dueDate: {
+          gte: new Date(year, month - 1, 1),
+          lt: new Date(year, month, 1),
+        },
+      },
+      _sum: { totalInclTax: true },
+    });
+
+    const docIncome = docResult._sum.amount || 0;
+    const invoiceIncome = invoiceResult._sum.totalInclTax || 0;
+    const totalIncome = docIncome + invoiceIncome;
+
+    console.log(`📅 CA du mois ${month}/${year}: ${totalIncome}€`);
+
+    return totalIncome;
+  }
 }

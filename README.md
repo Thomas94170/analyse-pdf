@@ -23,28 +23,101 @@
 
 
 
-📁 Upload et traitement OCR
+📦 Smart Invoice – Technical Documentation
 
-Endpoint POST /documents avec :
-Upload d’un fichier PDF avec Multer.
-Conversion PDF → image avec pdftocairo.
-Extraction de texte via Tesseract.js.
-Normalisation du texte pour détecter les doublons.
-Détection automatique du type de document (FACTURE / CERFA / AUTRE).
-Extraction de métadonnées clés :
-SIRET
-Total HT
-Total TTC
-Date d’échéance ou date de paiement
-Insertion complète en base de données avec Prisma et champ metadata (type JSONB).
-🔍 Fonctionnalités avancées déjà présentes
+🌐 Project Architecture
 
-Endpoint GET /documents/search?q=mot pour rechercher un mot dans le texte OCR extrait (ILIKE sur textExtracted).
-Endpoint GET /documents pour lister tous les documents.
-Endpoint GET /documents/id/:id pour afficher un document par son ID.
-Système de détection automatique des doublons à l'upload.
-Logique d’analyse de texte robuste avec regex adaptées au contexte de facture/CERFA.
-💰 Début du module CA
+Smart Invoice is built as a monolithic application using NestJS.
+It provides a complete backend solution for managing invoices, documents, and income calculations for freelancers (auto-entrepreneurs).
 
-Ajout du modèle Income en base.
-Endpoint GET prêt à calculer le chiffre d'affaires annuel à partir des montants TTC contenus dans les métadonnées (pas encore déclenché automatiquement).
+🏗️ Key Technologies:
+Backend: NestJS + Prisma ORM (PostgreSQL via Supabase)
+OCR: Tesseract.js + PDF-to-Image
+File Upload: Multer (local storage)
+No microservices – the entire system is a monolithic backend architecture.
+
+📂 Folder Structure:
+
+/src
+  /document       # PDF document management (upload + OCR analysis)
+  /invoice        # Invoice management (creation, status updates)
+  /income         # Income calculation (monthly/annual turnover & taxes)
+  /user           # User management (authentication & relations)
+  /ocr            # OCR services (text extraction from PDF)
+  /prisma         # Prisma schema & client service
+  /uploads        # Uploaded PDF files (via Multer)
+
+🗄️ Database Schema (Prisma)
+
+Model	            Relationships
+User	            Has many Documents, Invoices, and Income
+Document	        Belongs to User, may create one Income
+Invoice	          Belongs to User, may create one Income
+Income	          Belongs to User, may link to a Document or Invoice
+
+
+🚀 Features Overview: Services & Controllers
+
+🏷️ Module 
+  Document
+  Invoice
+  Income
+  User
+  OCR
+  PDF
+  Prisma
+
+🎯 Service 
+  DocumentsService
+  InvoiceService
+  IncomeService
+  UserService
+  OcrService
+  PdfService
+  PrismaService
+  
+
+🗂️ Controller 
+  DocumentsController
+  InvoiceController
+  IncomeController
+  UserService
+
+📝 Description
+			Upload PDF, extract text via OCR, classify, store metadata, link to income if validated
+
+			Create invoices, update status (ON_HOLD → PAID), generate income records when status changes
+
+			Calculate annual and monthly revenue & taxes per user (linked via userId)
+
+		  User management: registration, login, authentication (currently   basic; can expand to JWT auth)
+		
+      Extract text from PDF using Tesseract.js
+
+		  Convert PDF to images for OCR processing
+
+		  Database access layer using Prisma ORM
+
+
+
+
+📊 Business Logic
+
+✅ Invoice Flow:
+
+Users can create invoices via the API.
+Each invoice is linked to a user via userId.
+Once an invoice is marked as PAID, an income record is created with the amount and date.
+✅ Document Upload & OCR:
+
+Users can upload PDFs (e.g., invoices or quotes).
+The system uses OCR to extract text and metadata (SIRET, totals, dates...).
+If a document is validated (status: VALIDATED), its data is stored in the income table.
+✅ Income Calculation:
+
+The system calculates revenue and taxes:
+Annual and monthly turnover (GET /income/annual-income & GET /income/monthly-income)
+Annual and monthly taxes (calculated as 26.1% of revenue)
+✅ User-Specific Data:
+
+All documents, invoices, and income records are linked to a specific user via userId.

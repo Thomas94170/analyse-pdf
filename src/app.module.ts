@@ -8,9 +8,10 @@ import { IncomeModule } from './income/income.module';
 import { InvoiceModule } from './invoice/invoice.module';
 import { InvoiceService } from './invoice/invoice.service';
 import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [DocumentModule, IncomeModule, InvoiceModule, UserModule],
+  imports: [DocumentModule, IncomeModule, InvoiceModule, UserModule, AuthModule],
   controllers: [],
   providers: [OcrService, PdfService, IncomeService, InvoiceService],
 })

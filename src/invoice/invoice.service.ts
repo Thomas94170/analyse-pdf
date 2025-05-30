@@ -16,6 +16,8 @@ export class InvoiceService {
         dueDate: true,
         phoneNumber: true,
         email: true,
+        userId: true,
+        user: { select: { email: true } },
       },
     });
     return allInvoices;
@@ -32,6 +34,8 @@ export class InvoiceService {
         phoneNumber: true,
         dueDate: true,
         email: true,
+        userId: true,
+        user: { select: { email: true } },
       },
     });
     return byClient;
@@ -48,6 +52,8 @@ export class InvoiceService {
         phoneNumber: true,
         dueDate: true,
         email: true,
+        userId: true,
+        user: { select: { email: true } },
       },
     });
     return byId;
@@ -89,6 +95,7 @@ export class InvoiceService {
         dueDate: createInvoiceDto.dueDate,
         phoneNumber: createInvoiceDto.phoneNumber,
         email: createInvoiceDto.email,
+        userId: createInvoiceDto.userId,
       },
     });
     console.log(`invoice created`);
@@ -120,6 +127,7 @@ export class InvoiceService {
           year: year,
           month,
           invoiceId: updatedInvoice.id,
+          userId: updatedInvoice.userId,
         },
       });
       console.log(

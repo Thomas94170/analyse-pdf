@@ -9,6 +9,7 @@ import {
   Delete,
   Query,
   Patch,
+  Body,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -16,6 +17,7 @@ import { DocumentsService } from './document.service';
 import { v4 as uuidv4 } from 'uuid';
 import { extname } from 'path';
 import { PrismaService } from '../prisma/prisma.service';
+import { UploadDocumentDto } from './dto/upload-document.dto';
 
 @Controller('documents')
 export class DocumentsController {
@@ -42,12 +44,19 @@ export class DocumentsController {
       },
     }),
   )
-  async uploadFile(@UploadedFile() file: Express.Multer.File) {
+  async uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() uploadDocumentDto: UploadDocumentDto,
+  ) {
+    const { userId } = uploadDocumentDto;
     try {
       if (!file) {
         throw new BadRequestException('Aucun fichier reçu');
       }
-      return await this.documentsService.create(file);
+      if (!userId) {
+        throw new BadRequestException('userId requis');
+      }
+      return await this.documentsService.create(file, userId);
     } catch (error) {
       console.error('Erreur dans uploadFile :', error);
       throw new BadRequestException(

@@ -12,7 +12,7 @@ export class DocumentsService {
     private readonly pdfService: PdfService,
   ) {}
 
-  async create(file: Express.Multer.File): Promise<Document> {
+  async create(file: Express.Multer.File, userId: string): Promise<Document> {
     try {
       const convertPdf = await this.pdfService.convertPdfToImage(file.filename);
       console.log('conversion', convertPdf);
@@ -47,6 +47,7 @@ export class DocumentsService {
           status: DocumentStatus.IN_PROGRESS,
           textExtracted: normalizedText,
           metadata: dataExtracted ?? Prisma.DbNull,
+          userId: userId,
         },
       });
       console.log(uploadDoc, 'upload ici');
@@ -89,6 +90,8 @@ export class DocumentsService {
         originalName: true,
         textExtracted: true,
         metadata: true,
+        userId: true,
+        user: { select: { email: true } },
       },
     });
     return allDocuments;
@@ -102,6 +105,8 @@ export class DocumentsService {
         originalName: true,
         textExtracted: true,
         metadata: true,
+        userId: true,
+        user: { select: { email: true } },
       },
     });
     return docById;
@@ -130,6 +135,8 @@ export class DocumentsService {
           originalName: true,
           type: true,
           textExtracted: true,
+          userId: true,
+          user: { select: { email: true } },
         },
       });
       return searchWord;
@@ -275,6 +282,12 @@ export class DocumentsService {
   ): Promise<void> {
     const document = await this.prisma.document.findUnique({
       where: { id: documentId },
+      select: {
+        id: true,
+        userId: true,
+        status: true,
+        type: true,
+      },
     });
     if (
       !document ||
@@ -288,6 +301,7 @@ export class DocumentsService {
       });
       return;
     }
+    const userId = document.userId;
 
     const totalTTCString = metadata?.totalTTC?.replace(',', '.');
     const amount = totalTTCString ? parseFloat(totalTTCString) : null;
@@ -345,6 +359,7 @@ export class DocumentsService {
           year,
           month,
           documentId,
+          userId
         },
       });
       console.log(`💸 Income enregistré : ${amount}€ pour ${month} - ${year}`);

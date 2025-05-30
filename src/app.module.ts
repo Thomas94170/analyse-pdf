@@ -7,9 +7,10 @@ import { IncomeService } from './income/income.service';
 import { IncomeModule } from './income/income.module';
 import { InvoiceModule } from './invoice/invoice.module';
 import { InvoiceService } from './invoice/invoice.service';
+import { UserModule } from './user/user.module';
 
 @Module({
-  imports: [DocumentModule, IncomeModule, InvoiceModule],
+  imports: [DocumentModule, IncomeModule, InvoiceModule, UserModule],
   controllers: [],
   providers: [OcrService, PdfService, IncomeService, InvoiceService],
 })

@@ -7,6 +7,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+   id            String         @id @default(uuid())
+   email         String         @unique
+   password      String
+   documents Document[]
+  invoices  Invoice[]
+  incomes   Income[]
+}
+
 model Document {
   id            String         @id @default(uuid())
   filename      String
@@ -17,6 +26,8 @@ model Document {
   textExtracted String?
   createdAt     DateTime       @default(now())
   metadata      Json?
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   Income        Income[]
 }
 
@@ -28,6 +39,8 @@ model Income {
   documentId String?
   createdAt  DateTime  @default(now())
   invoiceId  String?
+   userId     String
+   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   document   Document? @relation(fields: [documentId], references: [id], onDelete: Cascade)
   invoice    Invoice?  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
@@ -43,6 +56,8 @@ model Invoice {
   phoneNumber  String?
   status       InvoiceStatus @default(ON_HOLD)
   invoiceName  String        @unique
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   Income       Income[]
 }
 

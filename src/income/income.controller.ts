@@ -16,13 +16,16 @@ export class IncomeController {
   ) {}
 
   @Get('annual-income')
-  async annualIncome(@Query('year') yearString: string) {
+  async annualIncome(
+    @Query('year') yearString: string,
+    @Query('userId') userId: string,
+  ) {
     const year = parseInt(yearString, 10);
     if (isNaN(year)) {
       throw new BadRequestException('Year must be a valid number');
     }
     try {
-      const result = await this.incomeService.annualIncome(year);
+      const result = await this.incomeService.annualIncome(year, userId);
       return result;
     } catch (error) {
       throw new BadRequestException(`erreur ${error}`);
@@ -30,19 +33,22 @@ export class IncomeController {
   }
 
   @Get('annual-taxation')
-  async annualTaxation(@Query('year') yearString: string) {
+  async annualTaxation(
+    @Query('year') yearString: string,
+    @Query('userId') userId: string,
+  ) {
     const year = parseInt(yearString, 10);
     if (isNaN(year)) {
       throw new BadRequestException('Year must be a valid number');
     }
     try {
-      const result = await this.incomeService.annualTaxation(year);
+      const result = await this.incomeService.annualTaxation(year, userId);
       if (!result) {
-        throw new Error(`pas de rentree d argent donc pas de taxe `);
+        throw new Error(`No income no taxes `);
       }
       return result;
     } catch (error) {
-      throw new BadRequestException(`erreur ${error}`);
+      throw new BadRequestException(`error ${error}`);
     }
   }
 
@@ -50,11 +56,16 @@ export class IncomeController {
   async monthlyIncome(
     @Query('year', ParseIntPipe) year: number,
     @Query('month', ParseIntPipe) month: number,
+    @Query('userId') userId: string,
   ) {
     try {
-      const result = await this.incomeService.monthlyIncome(year, month);
+      const result = await this.incomeService.monthlyIncome(
+        year,
+        month,
+        userId,
+      );
       if (!result) {
-        throw new Error(`no income for this month ${month} year ${year}`);
+        throw new Error(`No income for this month ${month} year ${year}`);
       }
       return result;
     } catch (error) {
@@ -66,11 +77,16 @@ export class IncomeController {
   async monthlyTaxation(
     @Query('year', ParseIntPipe) year: number,
     @Query('month', ParseIntPipe) month: number,
+    @Query('userId') userId: string,
   ) {
     try {
-      const result = await this.incomeService.monthlyTaxation(year, month);
+      const result = await this.incomeService.monthlyTaxation(
+        year,
+        month,
+        userId,
+      );
       if (result === null || !result) {
-        throw new Error(`no income and no tax for this ${month}`);
+        throw new Error(`No income and no tax for this ${month}`);
       }
       return result;
     } catch (error) {

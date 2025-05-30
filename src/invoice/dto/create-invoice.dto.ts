@@ -33,4 +33,7 @@ export class CreateInvoiceDto {
 
   @IsEnum(InvoiceStatus)
   status: InvoiceStatus;
+
+  @IsString()
+  userId: string;
 }

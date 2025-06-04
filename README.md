@@ -121,3 +121,14 @@ Annual and monthly taxes (calculated as 26.1% of revenue)
 ✅ User-Specific Data:
 
 All documents, invoices, and income records are linked to a specific user via userId.
+
+
+For JWT Token : 
+
+For JWT token generation, follow the official NestJS documentation.
+First, install the JWT package: npm i --save @nestjs/jwt
+
+Then install the config package: npm i --save @nestjs/config
+
+In auth.module.ts, do not add JwtService in the providers array.
+Doing so will cause a bug where the private key from jwtConstants is not recognized.

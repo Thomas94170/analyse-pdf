@@ -1,18 +1,32 @@
-import { Body, Controller, NotFoundException, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { LoginUserDto } from '../user/dto/login-user.dto';
+import { JwtAuthGuard } from './auth.guard';
+import { RequestWithUser } from './jwt.strategy';
+import { UserService } from '../user/user.service';
 
-export type AuthBody = { email: string; password: string };
+//export type AuthBody = { email: string; password: string };
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UserService,
+  ) {}
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto) {
     try {
       const create = await this.authService.register(createUserDto);
-      if (create){
+      if (create) {
         console.log(`user create with success`);
       }
       console.log(create);
@@ -34,5 +48,12 @@ export class AuthController {
     } catch (error) {
       throw new NotFoundException(`error : ${error}`);
     }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get()
+  async authenticateUser(@Request() req: RequestWithUser) {
+    console.log(req.user.userId);
+    return await this.userService.userById({ id: req.user.userId });
   }
 }

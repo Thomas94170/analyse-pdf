@@ -6,5 +6,6 @@ async function bootstrap() {
   await app.listen(process.env.PORT ?? 3000);
   console.log('running on PORT, ', process.env.PORT ?? 3000);
   console.log('running on db, ', process.env.DATABASE_URL);
+  console.log(process.env.JWT_SECRET);
 }
 bootstrap();

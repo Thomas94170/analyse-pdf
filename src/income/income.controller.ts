@@ -67,7 +67,7 @@ export class IncomeController {
       if (!result) {
         throw new Error(`No income for this month ${month} year ${year}`);
       }
-      return result;
+      return { value: result ?? 0 };
     } catch (error) {
       throw new BadRequestException(`error: ${error}`);
     }
@@ -88,7 +88,7 @@ export class IncomeController {
       if (result === null || !result) {
         throw new Error(`No income and no tax for this ${month}`);
       }
-      return result;
+      return { value: result ?? 0 };
     } catch (error) {
       throw new BadRequestException(`error: ${error}`);
     }

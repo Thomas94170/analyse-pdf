@@ -70,7 +70,7 @@ export class AuthService {
   private authenticateUser({ userId }: { userId: string }) {
     const payload: UserPayload = { userId };
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: this.jwtService.sign(payload), // ajouter une expiration plus tard sign(payload, { expiresIn: '1h' })
     };
   }
 }

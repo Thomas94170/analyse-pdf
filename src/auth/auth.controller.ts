@@ -56,4 +56,10 @@ export class AuthController {
     console.log(req.user.userId);
     return await this.userService.userById({ id: req.user.userId });
   }
+
+  @Post('logout')
+  logout() {
+    console.log('Logout successful');
+    return { message: 'Logout successful' };
+  }
 }

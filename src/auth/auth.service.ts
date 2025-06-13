@@ -6,12 +6,15 @@ import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { LoginUserDto } from 'src/user/dto/login-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UserPayload } from './jwt.strategy';
+import { UpdateUserDto } from '../user/dto/update-user.dto';
+import { MailerService } from '../mailer/mailer.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly mailerService: MailerService,
   ) {}
   async login(loginUserDto: LoginUserDto) {
     const { email, password } = loginUserDto;
@@ -48,7 +51,35 @@ export class AuthService {
         password: hashedPassword,
       },
     });
-    return user;
+    await this.mailerService.sendMailAfterRegistration(email);
+    return {
+      message: 'User created with success. Login please.',
+      userId: user.id,
+    };
+  }
+
+  async resetPassword(updateUserDto: UpdateUserDto) {
+    const { email, password } = updateUserDto;
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
+    if (!existingUser) {
+      throw new Error(`Bad credential`);
+    }
+    const hashedPassword = await this.hashPassword({ password });
+    const userUpdated = await this.prisma.user.update({
+      where: { email },
+      data: {
+        password: hashedPassword,
+      },
+      select: { id: true, email: true },
+    });
+    console.log(userUpdated);
+    await this.mailerService.newPassword(email);
+    return {
+      message: 'User created with success. Login please.',
+      userId: userUpdated.id,
+    };
   }
 
   private async hashPassword({ password }: { password: string }) {

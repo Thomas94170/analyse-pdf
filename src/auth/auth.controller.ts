@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   NotFoundException,
+  Patch,
   Post,
   Request,
   UseGuards,
@@ -13,6 +14,7 @@ import { LoginUserDto } from '../user/dto/login-user.dto';
 import { JwtAuthGuard } from './auth.guard';
 import { RequestWithUser } from './jwt.strategy';
 import { UserService } from '../user/user.service';
+import { UpdateUserDto } from '../user/dto/update-user.dto';
 
 //export type AuthBody = { email: string; password: string };
 
@@ -55,6 +57,18 @@ export class AuthController {
   async authenticateUser(@Request() req: RequestWithUser) {
     console.log(req.user.userId);
     return await this.userService.userById({ id: req.user.userId });
+  }
+
+  @Patch('new-password')
+  async newPassword(@Body() updateUserDto: UpdateUserDto) {
+    try {
+      const updatePassword =
+        await this.authService.resetPassword(updateUserDto);
+      console.log(updatePassword);
+      return updatePassword;
+    } catch (error) {
+      throw new NotFoundException(`error : ${error}`);
+    }
   }
 
   @Post('logout')

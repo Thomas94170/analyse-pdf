@@ -10,6 +10,8 @@ import { InvoiceService } from './invoice/invoice.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { MailerModule } from './mailer/mailer.module';
+import { MailerService } from './mailer/mailer.service';
 
 @Module({
   imports: [
@@ -19,8 +21,15 @@ import { ConfigModule } from '@nestjs/config';
     UserModule,
     AuthModule,
     ConfigModule.forRoot({ isGlobal: true }),
+    MailerModule,
   ],
   controllers: [],
-  providers: [OcrService, PdfService, IncomeService, InvoiceService],
+  providers: [
+    OcrService,
+    PdfService,
+    IncomeService,
+    InvoiceService,
+    MailerService,
+  ],
 })
 export class AppModule {}

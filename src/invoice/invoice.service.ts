@@ -10,12 +10,14 @@ export class InvoiceService {
     const allInvoices = await this.prisma.invoice.findMany({
       select: {
         id: true,
+        invoiceName: true,
         client: true,
         totalBT: true,
         totalInclTax: true,
         dueDate: true,
         phoneNumber: true,
         email: true,
+        status: true,
         userId: true,
         user: { select: { email: true } },
       },

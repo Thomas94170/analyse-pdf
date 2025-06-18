@@ -42,6 +42,16 @@ export class InvoiceController {
     }
   }
 
+  @Get(':userId')
+  async readInvoicesByUser(@Param('userId') userId: string) {
+    try {
+      const invoices = await this.invoiceService.findByUserId(userId);
+      return invoices;
+    } catch (error) {
+      throw new BadRequestException(`error while fetching invoices: ${error}`);
+    }
+  }
+
   @Get('client/:client')
   async invoiceByClient(@Param('client') client: string) {
     try {

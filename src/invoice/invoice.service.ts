@@ -79,6 +79,25 @@ export class InvoiceService {
     return byDate;
   }
 
+  async findByUserId(userId: string) {
+    return this.prisma.invoice.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        invoiceName: true,
+        client: true,
+        totalBT: true,
+        totalInclTax: true,
+        dueDate: true,
+        phoneNumber: true,
+        email: true,
+        status: true,
+        userId: true,
+        user: { select: { email: true } },
+      },
+    });
+  }
+
   async createInvoice(createInvoiceDto: CreateInvoiceDto) {
     const existingInvoice = await this.prisma.invoice.findUnique({
       where: { invoiceName: createInvoiceDto.invoiceName },

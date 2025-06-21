@@ -60,7 +60,13 @@ export class DocumentsService {
     }
   }
 
-  async updateDocs({ originalName }: { originalName: string }) {
+  async updateDocs({
+    originalName,
+    paymentDate,
+  }: {
+    originalName: string;
+    paymentDate?: string;
+  }) {
     const findDoc = await this.prisma.document.findUnique({
       where: { originalName },
     });
@@ -71,9 +77,26 @@ export class DocumentsService {
       );
     }
 
+    let updatedMetadata: Prisma.InputJsonValue | undefined = undefined;
+
+    if (paymentDate) {
+      const safeMeta: Record<string, any> =
+        findDoc.metadata && typeof findDoc.metadata === 'object'
+          ? (findDoc.metadata as Record<string, any>)
+          : {};
+
+      updatedMetadata = {
+        ...safeMeta,
+        paymentDate,
+      };
+    }
+
     const docUpdated = await this.prisma.document.update({
       where: { originalName },
-      data: { status: 'VALIDATED' },
+      data: {
+        status: 'VALIDATED',
+        ...(updatedMetadata !== undefined && { metadata: updatedMetadata }),
+      },
     });
 
     await this.recordInvoice(

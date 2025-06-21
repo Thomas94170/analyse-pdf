@@ -125,10 +125,14 @@ export class DocumentsController {
   }
 
   @Patch('update/:facture')
-  async updateDocument(@Param('facture') originalName: string) {
+  async updateDocument(
+    @Param('facture') originalName: string,
+    @Body() body: { paymentDate?: string },
+  ) {
     try {
       const changeStatus = await this.documentsService.updateDocs({
         originalName,
+        paymentDate: body.paymentDate,
       });
       if (!changeStatus) {
         throw new BadRequestException(

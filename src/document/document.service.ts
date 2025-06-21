@@ -112,6 +112,21 @@ export class DocumentsService {
     return docById;
   }
 
+  async readDocumentByUserId({ userId }: { userId: string }) {
+    const docByUserId = await this.prisma.document.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        userId: true,
+        originalName: true,
+        filename: true,
+        metadata: true,
+        status: true,
+      },
+    });
+    return docByUserId;
+  }
+
   async deleteDocument({ id }: { id: string }) {
     try {
       const delDoc = await this.prisma.document.delete({ where: { id } });
@@ -359,7 +374,7 @@ export class DocumentsService {
           year,
           month,
           documentId,
-          userId
+          userId,
         },
       });
       console.log(`💸 Income enregistré : ${amount}€ pour ${month} - ${year}`);

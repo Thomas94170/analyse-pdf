@@ -79,6 +79,16 @@ export class DocumentsController {
     }
   }
 
+  @Get(':userId')
+  async readDocByUserId(@Param('userId') userId: string) {
+    try {
+      const docs = await this.documentsService.readDocumentByUserId({ userId });
+      return docs;
+    } catch (error) {
+      throw new BadRequestException(`error while fetching documents: ${error}`);
+    }
+  }
+
   @Get('id/:id')
   async readOneDoc(@Param('id') id: string) {
     try {

@@ -82,6 +82,10 @@ export class AuthService {
     };
   }
 
+  logout(userId: string) {
+    return { message: `Logout successfully for ${userId}` };
+  }
+
   private async hashPassword({ password }: { password: string }) {
     const hashedPassword = await hash(password, 10);
     return hashedPassword;

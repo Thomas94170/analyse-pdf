@@ -5,6 +5,7 @@ import {
   NotFoundException,
   Patch,
   Post,
+  Req,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -72,8 +73,9 @@ export class AuthController {
   }
 
   @Post('logout')
-  logout() {
-    console.log('Logout successful');
-    return { message: 'Logout successful' };
+  logout(@Req() req) {
+    const userId = req.user?.userId;
+    console.log('Déconnexion backend pour user :', userId);
+    return this.authService.logout(userId);
   }
 }

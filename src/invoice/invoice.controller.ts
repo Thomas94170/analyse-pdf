@@ -89,6 +89,7 @@ export class InvoiceController {
   async createInvoice(@Body() createInvoiceDto: CreateInvoiceDto) {
     try {
       const create = await this.invoiceService.createInvoice(createInvoiceDto);
+      console.log(create);
       return create;
     } catch (error) {
       throw new BadRequestException(`error in creation ${error}`);

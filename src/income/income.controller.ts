@@ -51,6 +51,8 @@ export class IncomeController {
     @Param('userId') userId: string,
   ) {
     try {
+      console.log('Get monthly income:', { year, month, userId });
+
       const result = await this.incomeService.monthlyIncome(
         year,
         month,

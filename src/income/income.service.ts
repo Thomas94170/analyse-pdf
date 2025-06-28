@@ -6,19 +6,26 @@ export class IncomeService {
   constructor(private readonly prisma: PrismaService) {}
 
   async annualIncome(year: number, userId: string) {
-    const docResult = await this.prisma.income.aggregate({
+    // ✅ DOCS
+    const docs = await this.prisma.income.findMany({
       where: {
         year,
         userId,
-        document: {
-          // ✅ CORRECTION: Remplacer "is" par la syntaxe correcte
-          status: 'VALIDATED',
-          type: 'FACTURE',
-        },
+        documentId: { not: null },
       },
-      _sum: { amount: true },
+      include: {
+        document: true,
+      },
     });
 
+    const docIncome = docs
+      .filter(
+        (d) =>
+          d.document?.status === 'VALIDATED' && d.document?.type === 'FACTURE',
+      )
+      .reduce((sum, d) => sum + d.amount, 0);
+
+    // ✅ INVOICES
     const invoiceResult = await this.prisma.invoice.aggregate({
       where: {
         status: 'PAID',
@@ -33,7 +40,6 @@ export class IncomeService {
 
     console.log(`Invoices détectées pour ${year}:`, invoiceResult);
 
-    const docIncome = docResult._sum.amount || 0;
     const invoiceIncome = invoiceResult._sum.totalInclTax || 0;
     const totalIncome = docIncome + invoiceIncome;
 
@@ -46,19 +52,26 @@ export class IncomeService {
   }
 
   async annualTaxation(year: number, userId: string) {
-    const docResult = await this.prisma.income.aggregate({
+    // ✅ DOCS
+    const docs = await this.prisma.income.findMany({
       where: {
         year,
         userId,
-        document: {
-          // ✅ CORRECTION: Même correction ici
-          status: 'VALIDATED',
-          type: 'FACTURE',
-        },
+        documentId: { not: null },
       },
-      _sum: { amount: true },
+      include: {
+        document: true,
+      },
     });
 
+    const docIncome = docs
+      .filter(
+        (d) =>
+          d.document?.status === 'VALIDATED' && d.document?.type === 'FACTURE',
+      )
+      .reduce((sum, d) => sum + d.amount, 0);
+
+    // ✅ INVOICES
     const invoiceResult = await this.prisma.invoice.aggregate({
       where: {
         status: 'PAID',
@@ -71,7 +84,6 @@ export class IncomeService {
       _sum: { totalInclTax: true },
     });
 
-    const docIncome = docResult._sum.amount || 0;
     const invoiceIncome = invoiceResult._sum.totalInclTax || 0;
     const totalIncome = docIncome + invoiceIncome;
     const taxation = totalIncome * 0.261;
@@ -83,20 +95,27 @@ export class IncomeService {
   }
 
   async monthlyIncome(year: number, month: number, userId: string) {
-    const docResult = await this.prisma.income.aggregate({
+    // ✅ DOCS
+    const docs = await this.prisma.income.findMany({
       where: {
         year,
         month,
         userId,
-        document: {
-          // ✅ CORRECTION: Même correction ici
-          status: 'VALIDATED',
-          type: 'FACTURE',
-        },
+        documentId: { not: null },
       },
-      _sum: { amount: true },
+      include: {
+        document: true,
+      },
     });
 
+    const docIncome = docs
+      .filter(
+        (d) =>
+          d.document?.status === 'VALIDATED' && d.document?.type === 'FACTURE',
+      )
+      .reduce((sum, d) => sum + d.amount, 0);
+
+    // ✅ INVOICES
     const invoiceResult = await this.prisma.invoice.aggregate({
       where: {
         status: 'PAID',
@@ -113,7 +132,6 @@ export class IncomeService {
       _sum: { totalInclTax: true },
     });
 
-    const docIncome = docResult._sum.amount || 0;
     const invoiceIncome = invoiceResult._sum.totalInclTax || 0;
     const totalIncome = docIncome + invoiceIncome;
 

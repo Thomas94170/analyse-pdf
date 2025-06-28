@@ -23,8 +23,8 @@ export class IncomeService {
         status: 'PAID',
         userId,
         dueDate: {
-          gte: new Date(`${year}-01-01`),
-          lt: new Date(`${year + 1}-01-01`),
+          gte: new Date(`${year}-01-01T00:00:00Z`),
+          lt: new Date(`${year + 1}-01-01T00:00:00Z`),
         },
       },
       _sum: { totalInclTax: true },
@@ -56,8 +56,8 @@ export class IncomeService {
         status: 'PAID',
         userId,
         dueDate: {
-          gte: new Date(`${year}-01-01`),
-          lt: new Date(`${year + 1}-01-01`),
+          gte: new Date(`${year}-01-01T00:00:00Z`),
+          lt: new Date(`${year + 1}-01-01T00:00:00Z`),
         },
       },
       _sum: { totalInclTax: true },
@@ -92,9 +92,17 @@ export class IncomeService {
       where: {
         status: 'PAID',
         userId,
+        // dueDate: {
+        //   gte: new Date(year, month - 1, 1),
+        //   lt: new Date(year, month, 1),
+        // },
         dueDate: {
-          gte: new Date(year, month - 1, 1),
-          lt: new Date(year, month, 1),
+          gte: new Date(
+            `${year}-${month.toString().padStart(2, '0')}-01T00:00:00Z`,
+          ),
+          lt: new Date(
+            `${year}-${(month + 1).toString().padStart(2, '0')}-01T00:00:00Z`,
+          ),
         },
       },
       _sum: { totalInclTax: true },

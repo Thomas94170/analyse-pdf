@@ -2,8 +2,8 @@ import {
   BadRequestException,
   Controller,
   Get,
+  Param,
   ParseIntPipe,
-  Query,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { IncomeService } from './income.service';
@@ -15,15 +15,11 @@ export class IncomeController {
     private readonly prisma: PrismaService,
   ) {}
 
-  @Get('annual-income')
+  @Get('annual-income/:year/:userId')
   async annualIncome(
-    @Query('year') yearString: string,
-    @Query('userId') userId: string,
+    @Param('year', ParseIntPipe) year: number,
+    @Param('userId') userId: string,
   ) {
-    const year = parseInt(yearString, 10);
-    if (isNaN(year)) {
-      throw new BadRequestException('Year must be a valid number');
-    }
     try {
       const result = await this.incomeService.annualIncome(year, userId);
       return result;
@@ -32,19 +28,15 @@ export class IncomeController {
     }
   }
 
-  @Get('annual-taxation')
+  @Get('annual-taxation/:year/:userId')
   async annualTaxation(
-    @Query('year') yearString: string,
-    @Query('userId') userId: string,
+    @Param('year', ParseIntPipe) year: number,
+    @Param('userId') userId: string,
   ) {
-    const year = parseInt(yearString, 10);
-    if (isNaN(year)) {
-      throw new BadRequestException('Year must be a valid number');
-    }
     try {
       const result = await this.incomeService.annualTaxation(year, userId);
       if (!result) {
-        throw new Error(`No income no taxes `);
+        throw new Error(`No income no taxes`);
       }
       return result;
     } catch (error) {
@@ -52,11 +44,11 @@ export class IncomeController {
     }
   }
 
-  @Get('monthly-income')
+  @Get('monthly-income/:year/:month/:userId')
   async monthlyIncome(
-    @Query('year', ParseIntPipe) year: number,
-    @Query('month', ParseIntPipe) month: number,
-    @Query('userId') userId: string,
+    @Param('year', ParseIntPipe) year: number,
+    @Param('month', ParseIntPipe) month: number,
+    @Param('userId') userId: string,
   ) {
     try {
       const result = await this.incomeService.monthlyIncome(
@@ -64,20 +56,17 @@ export class IncomeController {
         month,
         userId,
       );
-      if (!result) {
-        throw new Error(`No income for this month ${month} year ${year}`);
-      }
       return { value: result ?? 0 };
     } catch (error) {
       throw new BadRequestException(`error: ${error}`);
     }
   }
 
-  @Get('monthly-taxation')
+  @Get('monthly-taxation/:year/:month/:userId')
   async monthlyTaxation(
-    @Query('year', ParseIntPipe) year: number,
-    @Query('month', ParseIntPipe) month: number,
-    @Query('userId') userId: string,
+    @Param('year', ParseIntPipe) year: number,
+    @Param('month', ParseIntPipe) month: number,
+    @Param('userId') userId: string,
   ) {
     try {
       const result = await this.incomeService.monthlyTaxation(
@@ -85,9 +74,6 @@ export class IncomeController {
         month,
         userId,
       );
-      if (result === null || !result) {
-        throw new Error(`No income and no tax for this ${month}`);
-      }
       return { value: result ?? 0 };
     } catch (error) {
       throw new BadRequestException(`error: ${error}`);

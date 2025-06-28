@@ -11,10 +11,9 @@ export class IncomeService {
         year,
         userId,
         document: {
-          is: {
-            status: 'VALIDATED',
-            type: 'FACTURE',
-          },
+          // ✅ CORRECTION: Remplacer "is" par la syntaxe correcte
+          status: 'VALIDATED',
+          type: 'FACTURE',
         },
       },
       _sum: { amount: true },
@@ -31,7 +30,9 @@ export class IncomeService {
       },
       _sum: { totalInclTax: true },
     });
+
     console.log(`Invoices détectées pour ${year}:`, invoiceResult);
+
     const docIncome = docResult._sum.amount || 0;
     const invoiceIncome = invoiceResult._sum.totalInclTax || 0;
     const totalIncome = docIncome + invoiceIncome;
@@ -50,14 +51,14 @@ export class IncomeService {
         year,
         userId,
         document: {
-          is: {
-            status: 'VALIDATED',
-            type: 'FACTURE',
-          },
+          // ✅ CORRECTION: Même correction ici
+          status: 'VALIDATED',
+          type: 'FACTURE',
         },
       },
       _sum: { amount: true },
     });
+
     const invoiceResult = await this.prisma.invoice.aggregate({
       where: {
         status: 'PAID',
@@ -73,8 +74,8 @@ export class IncomeService {
     const docIncome = docResult._sum.amount || 0;
     const invoiceIncome = invoiceResult._sum.totalInclTax || 0;
     const totalIncome = docIncome + invoiceIncome;
-
     const taxation = totalIncome * 0.261;
+
     console.log(`📊 Total CA ${year}: ${totalIncome}€`);
     console.log(`💸 Taxes dues ${year}: ${taxation}€`);
 
@@ -88,10 +89,9 @@ export class IncomeService {
         month,
         userId,
         document: {
-          is: {
-            status: 'VALIDATED',
-            type: 'FACTURE',
-          },
+          // ✅ CORRECTION: Même correction ici
+          status: 'VALIDATED',
+          type: 'FACTURE',
         },
       },
       _sum: { amount: true },
@@ -101,10 +101,6 @@ export class IncomeService {
       where: {
         status: 'PAID',
         userId,
-        // dueDate: {
-        //   gte: new Date(year, month - 1, 1),
-        //   lt: new Date(year, month, 1),
-        // },
         dueDate: {
           gte: new Date(
             `${year}-${month.toString().padStart(2, '0')}-01T00:00:00Z`,
@@ -130,11 +126,12 @@ export class IncomeService {
 
   async monthlyTaxation(year: number, month: number, userId: string) {
     const totalIncomeByMonth = await this.monthlyIncome(year, month, userId);
-
     const taxation = totalIncomeByMonth * 0.261;
+
     console.log(
       `📅 taxation du mois ${month}/${year}: ${taxation}€ pour userId: ${userId}`,
     );
+
     return taxation;
   }
 }

@@ -8,6 +8,7 @@ async function bootstrap() {
       'http://localhost:5173',
       'https://si-front-x8bk.vercel.app',
       'https://www.si-front-x8bk.vercel.app',
+      'https://si-front-x8bk-3nqqldvye-thomas94170s-projects.vercel.app',
     ],
     credentials: true,
   });

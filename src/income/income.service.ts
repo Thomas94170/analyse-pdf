@@ -11,8 +11,10 @@ export class IncomeService {
         year,
         userId,
         document: {
-          status: 'VALIDATED',
-          type: 'FACTURE',
+          is: {
+            status: 'VALIDATED',
+            type: 'FACTURE',
+          },
         },
       },
       _sum: { amount: true },
@@ -47,7 +49,12 @@ export class IncomeService {
       where: {
         year,
         userId,
-        document: { status: 'VALIDATED', type: 'FACTURE' },
+        document: {
+          is: {
+            status: 'VALIDATED',
+            type: 'FACTURE',
+          },
+        },
       },
       _sum: { amount: true },
     });
@@ -81,8 +88,10 @@ export class IncomeService {
         month,
         userId,
         document: {
-          status: 'VALIDATED',
-          type: 'FACTURE',
+          is: {
+            status: 'VALIDATED',
+            type: 'FACTURE',
+          },
         },
       },
       _sum: { amount: true },

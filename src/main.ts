@@ -15,3 +15,4 @@ async function bootstrap() {
   console.log(process.env.DATABASE_URL);
 }
 bootstrap();
+//pour le moment deploiement sur render

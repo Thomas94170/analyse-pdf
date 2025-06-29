@@ -10,6 +10,7 @@ async function bootstrap() {
       'https://www.si-front-x8bk.vercel.app',
       'https://si-front-x8bk-3nqqldvye-thomas94170s-projects.vercel.app',
       'https://si-front-x8bk-knu2do7s6-thomas94170s-projects.vercel.app',
+      'http://35.180.135.75',
     ],
     credentials: true,
   });

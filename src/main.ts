@@ -4,14 +4,7 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: [
-      'http://localhost:5173',
-      'https://si-front-x8bk.vercel.app',
-      'https://www.si-front-x8bk.vercel.app',
-      'https://si-front-x8bk-3nqqldvye-thomas94170s-projects.vercel.app',
-      'https://si-front-x8bk-knu2do7s6-thomas94170s-projects.vercel.app',
-      'http://35.180.135.75',
-    ],
+    origin: true,
     credentials: true,
   });
 

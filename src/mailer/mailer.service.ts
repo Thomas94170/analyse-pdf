@@ -42,7 +42,7 @@ export class MailerService {
         <p>Bonjour <strong>${emailUser.email}</strong>,</p>
         <p>Nous vous confirmons que votre inscription a été prise en compte avec succès.</p>
         <p>Vous pouvez désormais vous connecter à votre compte et commencer à gérer vos devis et factures simplement.</p>
-        <a href="https://smart-invoice.example.com/login" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: #EE8434; color: white; text-decoration: none; border-radius: 4px;">
+        <a href="https://si-front-sandy.vercel.app/login" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: #EE8434; color: white; text-decoration: none; border-radius: 4px;">
           Se connecter
         </a>
         <p style="margin-top: 30px; font-size: 0.9em; color: #888;">Si vous n'êtes pas à l'origine de cette inscription, vous pouvez ignorer ce message.</p>
